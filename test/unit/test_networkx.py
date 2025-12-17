@@ -77,3 +77,29 @@ def test_add_edges_has_provided_neighbors():
     assert list(g.neighbors(NODES[0])) == [NODES[1], NODES[2]]
     assert list(g.neighbors(NODES[1])) == [NODES[0]]
     assert list(g.neighbors(NODES[2])) == [NODES[0]]
+
+
+def test_graph_iterator():
+    g = nx.MultiGraph()
+    g.add_edge(1, 2, weight=3)
+    g.add_edge(2, 3, weight=2)
+    g.add_edge(1, 3, weight=10)
+    assert [node for node in g] == [1, 2, 3]
+
+
+def test_neighbor_iterator():
+    g = nx.MultiGraph()
+    g.add_edge(1, 2, key=0, weight=3)
+    g.add_edge(2, 3, key=1, weight=2)
+    g.add_edge(1, 3, key=2, weight=10)
+    assert [node for node in g[1]] == [2, 3]
+
+
+def test_edge_access():
+    g = nx.MultiGraph()
+    g.add_edge(1, 2, key=0, weight=3)
+    g.add_edge(2, 3, key=1, weight=2)
+    g.add_edge(1, 3, key=2, weight=10)
+    assert g.edges[1, 2, 0]["weight"] == 3
+    assert g.edges[2, 3, 1]["weight"] == 2
+    assert g.edges[1, 3, 2]["weight"] == 10

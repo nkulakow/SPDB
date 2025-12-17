@@ -1,7 +1,7 @@
 import osmnx as ox
 import folium
 from shapely.geometry import mapping
-
+from pprint import pprint
 
 
 def visualize_graph(graph, point: tuple[float, float], highlight_edge=None):
@@ -53,16 +53,13 @@ def main():
     address = "Warszawa Centralna"
     point = ox.geocode(address)
 
-    G = ox.graph_from_point(point, dist=1000, network_type="drive")
-    ox.add_edge_speeds(G)
+    g = ox.graph_from_point(point, dist=1000, network_type="drive")
+    ox.add_edge_speeds(g)
 
-    node = list(G.nodes)[0]
-    neighbour = list(G.neighbors(node))[0]
-    key = list(G[node][neighbour].keys())[0]  # get the edge key
+    node = list(g.nodes)[0]
+    neighbor = list(g.neighbors(node))[0]
 
-    highlight_edge = (node, neighbour, key)
-
-    visualize_graph(G, point, highlight_edge)
+    pprint(dict(g[node][neighbor]))
 
 
 if __name__ == "__main__":

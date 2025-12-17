@@ -1,15 +1,14 @@
 import networkx as nx
+from dijkstra import dijkstra_shortest_path
 
 
 def main() -> None:
-    nodes_with_attrs = [
-        (1, {"color": "red"}),
-        (2, {"color": "blue"}),
-        ("some test node", {"color": "green", "weight": 5})
-    ]
-    g = nx.Graph()
-    g.add_nodes_from(nodes_with_attrs)
-    print(g.nodes[1])
+    g = nx.MultiGraph()
+    g.add_edge(1, 2, key=0, weight=3)
+    g.add_edge(1, 2, key=1, weight=4)
+    g.add_edge(2, 3, weight=2)
+    g.add_edge(1, 3, weight=10)
+    print(dijkstra_shortest_path(g, 1, 3))
 
 
 if __name__ == "__main__":
