@@ -103,3 +103,20 @@ def test_edge_access():
     assert g.edges[1, 2, 0]["weight"] == 3
     assert g.edges[2, 3, 1]["weight"] == 2
     assert g.edges[1, 3, 2]["weight"] == 10
+
+
+def test_multigraph_edge_iterator():
+    g = nx.MultiGraph()
+    g.add_edge(1, 2, key=0, weight=3)
+    g.add_edge(1, 2, key=1, weight=4)
+    g.add_edge(2, 3, key=0, weight=2)
+    g.add_edge(1, 3, key=0, weight=10)
+    expected_edges = sorted([
+        (1, 2, 0, {"weight": 3}),
+        (1, 2, 1, {"weight": 4}),
+        (2, 3, 0, {"weight": 2}),
+        (1, 3, 0, {"weight": 10})
+    ])
+    actual_edges = sorted(list(g.edges(data=True, keys=True)))
+    assert actual_edges == expected_edges
+
