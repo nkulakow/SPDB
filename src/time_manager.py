@@ -1,4 +1,4 @@
-from datetime import time
+from datetime import time, datetime, timedelta
 from dataclasses import dataclass
 
 
@@ -39,19 +39,32 @@ class VelociyModifier:
 
         return current_slot
 
-    def get_modifier(self, t: time) -> float:
-        """
-        Returns the velocity modifier for the given time t.
-        The slot includes the start time and excludes the end time.
-        """
+    def __find_node_by_time(self, t: time) -> "VelociyModifier.TimeSlot":
         current_slot = self.root
 
         while current_slot:
             if (current_slot.start <= t < current_slot.end) or (current_slot.start <= t and current_slot.end == time()):
-                return current_slot.modifier
+                return current_slot
             elif t < current_slot.start:
                 current_slot = current_slot.left_child
             else:
                 current_slot = current_slot.right_child
 
-        return 1.0
+        assert False, "unreachable code reached"
+
+    def get_velocity_modifier(self, t: time) -> float:
+        """
+        Returns the velocity modifier for the given time t.
+        The slot includes the start time and excludes the end time.
+        """
+        return self.__find_node_by_time(t).modifier
+
+    def get_max_time_in_slot(self, t: time) -> timedelta:
+        """
+        Returns the maximum time in the slot that contains time t.
+        """
+        slot = self.__find_node_by_time(t)
+        diff = datetime.combine(datetime.today(), slot.end) - datetime.combine(datetime.today(), t)
+        if slot.end == time():
+            diff += timedelta(days=1)
+        return diff

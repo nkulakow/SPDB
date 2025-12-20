@@ -1,5 +1,5 @@
 from time_manager import VelociyModifier
-from datetime import time, datetime
+from datetime import time, datetime, timedelta
 
 
 VELOCITY_MODIFIER = [
@@ -24,22 +24,44 @@ def test_create_time_manager():
 def test_get_modifier_time_equal_to_slot_start():
     time_manager = VelociyModifier(VELOCITY_MODIFIER)
 
-    assert time_manager.get_modifier(time(0, 0)) == 1.0
-    assert time_manager.get_modifier(time(2, 0)) == 1.2
-    assert time_manager.get_modifier(time(22, 0)) == 0.7
+    assert time_manager.get_velocity_modifier(time(0, 0)) == 1.0
+    assert time_manager.get_velocity_modifier(time(2, 0)) == 1.2
+    assert time_manager.get_velocity_modifier(time(22, 0)) == 0.7
 
 
 def test_get_modifier_time_equal_to_slot_end():
     time_manager = VelociyModifier(VELOCITY_MODIFIER)
 
-    assert time_manager.get_modifier(time(1, 59)) == 1.0
-    assert time_manager.get_modifier(time(3, 59)) == 1.2
-    assert time_manager.get_modifier(time(23, 59)) == 0.7
+    assert time_manager.get_velocity_modifier(time(1, 59)) == 1.0
+    assert time_manager.get_velocity_modifier(time(3, 59)) == 1.2
+    assert time_manager.get_velocity_modifier(time(23, 59)) == 0.7
 
 
 def test_get_modifier_time_in_between_slot():
     time_manager = VelociyModifier(VELOCITY_MODIFIER)
 
-    assert time_manager.get_modifier(time(5, 0)) == 0.8
-    assert time_manager.get_modifier(time(9, 30)) == 0.5
-    assert time_manager.get_modifier(time(15, 15)) == 1.0
+    assert time_manager.get_velocity_modifier(time(5, 0)) == 0.8
+    assert time_manager.get_velocity_modifier(time(9, 30)) == 0.5
+    assert time_manager.get_velocity_modifier(time(15, 15)) == 1.0
+
+
+def test_get_max_time_in_slot_time_equal_to_slot_start():
+    time_manager = VelociyModifier(VELOCITY_MODIFIER)
+
+    assert time_manager.get_max_time_in_slot(time(0, 0)) == timedelta(hours=2)
+    assert time_manager.get_max_time_in_slot(time(2, 0)) == timedelta(hours=2)
+    assert time_manager.get_max_time_in_slot(time(22, 0)) == timedelta(hours=2)
+
+def test_get_max_time_in_slot_time_equal_to_slot_end():
+    time_manager = VelociyModifier(VELOCITY_MODIFIER)
+
+    assert time_manager.get_max_time_in_slot(time(1, 59)) == timedelta(minutes=1)
+    assert time_manager.get_max_time_in_slot(time(3, 59)) == timedelta(minutes=1)
+    assert time_manager.get_max_time_in_slot(time(23, 59)) == timedelta(minutes=1)
+
+def test_get_max_time_in_slot_time_in_between_slot():
+    time_manager = VelociyModifier(VELOCITY_MODIFIER)
+
+    assert time_manager.get_max_time_in_slot(time(5, 0)) == timedelta(hours=1)
+    assert time_manager.get_max_time_in_slot(time(9, 30)) == timedelta(hours=0, minutes=30)
+    assert time_manager.get_max_time_in_slot(time(15, 15)) == timedelta(hours=0, minutes=45)
