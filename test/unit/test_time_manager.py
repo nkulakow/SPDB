@@ -1,20 +1,45 @@
 from time_manager import VelociyModifier
+from datetime import time, datetime
 
 
 VELOCITY_MODIFIER = [
-    ("00:00", 1.0),
-    ("02:00", 1.2),
-    ("04:00", 0.8),
-    ("06:00", 1.5),
-    ("08:00", 0.5),
-    ("10:00", 1.0),
-    ("12:00", 1.3),
-    ("14:00", 1.0),
-    ("16:00", 0.9),
-    ("18:00", 1.1),
-    ("20:00", 1.0),
-    ("22:00", 0.7)
+    (datetime.strptime("00:00", "%H:%M").time(), 1.0),
+    (datetime.strptime("02:00", "%H:%M").time(), 1.2),
+    (datetime.strptime("04:00", "%H:%M").time(), 0.8),
+    (datetime.strptime("06:00", "%H:%M").time(), 1.5),
+    (datetime.strptime("08:00", "%H:%M").time(), 0.5),
+    (datetime.strptime("10:00", "%H:%M").time(), 1.0),
+    (datetime.strptime("12:00", "%H:%M").time(), 1.3),
+    (datetime.strptime("14:00", "%H:%M").time(), 1.0),
+    (datetime.strptime("16:00", "%H:%M").time(), 0.9),
+    (datetime.strptime("18:00", "%H:%M").time(), 1.1),
+    (datetime.strptime("20:00", "%H:%M").time(), 1.0),
+    (datetime.strptime("22:00", "%H:%M").time(), 0.7)
 ]
 
 def test_create_time_manager():
-    tm = VelociyModifier(VELOCITY_MODIFIER)
+    VelociyModifier(VELOCITY_MODIFIER)
+
+
+def test_get_modifier_time_equal_to_slot_start():
+    time_manager = VelociyModifier(VELOCITY_MODIFIER)
+
+    assert time_manager.get_modifier(time(0, 0)) == 1.0
+    assert time_manager.get_modifier(time(2, 0)) == 1.2
+    assert time_manager.get_modifier(time(22, 0)) == 0.7
+
+
+def test_get_modifier_time_equal_to_slot_end():
+    time_manager = VelociyModifier(VELOCITY_MODIFIER)
+
+    assert time_manager.get_modifier(time(1, 59)) == 1.0
+    assert time_manager.get_modifier(time(3, 59)) == 1.2
+    assert time_manager.get_modifier(time(23, 59)) == 0.7
+
+
+def test_get_modifier_time_in_between_slot():
+    time_manager = VelociyModifier(VELOCITY_MODIFIER)
+
+    assert time_manager.get_modifier(time(5, 0)) == 0.8
+    assert time_manager.get_modifier(time(9, 30)) == 0.5
+    assert time_manager.get_modifier(time(15, 15)) == 1.0

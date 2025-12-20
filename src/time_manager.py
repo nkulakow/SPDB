@@ -38,3 +38,20 @@ class VelociyModifier:
                 current_slot.right_child = self.__build_tree(slots, middle_index + 1, end_index)
 
         return current_slot
+
+    def get_modifier(self, t: time) -> float:
+        """
+        Returns the velocity modifier for the given time t.
+        The slot includes the start time and excludes the end time.
+        """
+        current_slot = self.root
+
+        while current_slot:
+            if (current_slot.start <= t < current_slot.end) or (current_slot.start <= t and current_slot.end == time()):
+                return current_slot.modifier
+            elif t < current_slot.start:
+                current_slot = current_slot.left_child
+            else:
+                current_slot = current_slot.right_child
+
+        return 1.0
