@@ -2,7 +2,7 @@ from datetime import time, datetime, timedelta
 from dataclasses import dataclass
 
 
-class VelociyModifier:
+class VelocityModifier:
     """
     Stores velocity modifiers based on time in a binary search tree.
     """
@@ -16,20 +16,20 @@ class VelociyModifier:
         start: time
         end: time
         modifier: float
-        left_child: "VelociyModifier.TimeSlot | None" = None
-        right_child: "VelociyModifier.TimeSlot | None" = None
+        left_child: "VelocityModifier.TimeSlot | None" = None
+        right_child: "VelocityModifier.TimeSlot | None" = None
 
     root: TimeSlot
 
     def __init__(self, time_slots: list[tuple[time, float]]) -> None:
         self.root = self.__build_tree(time_slots, 0, len(time_slots) - 1)
 
-    def __build_tree(self, slots: list[tuple[time, float]], start_index: int, end_index: int) -> "VelociyModifier.TimeSlot | None":
+    def __build_tree(self, slots: list[tuple[time, float]], start_index: int, end_index: int) -> "VelocityModifier.TimeSlot | None":
         middle_index = (end_index - start_index) // 2 + start_index
         start, modifier = slots[middle_index]
         end = slots[middle_index + 1][0] if middle_index + 1 < len(slots) else time()
 
-        current_slot = VelociyModifier.TimeSlot(start=start, end=end, modifier=modifier)
+        current_slot = VelocityModifier.TimeSlot(start=start, end=end, modifier=modifier)
 
         if end_index - start_index >= 1:
             if middle_index > start_index:
@@ -39,7 +39,10 @@ class VelociyModifier:
 
         return current_slot
 
-    def __find_node_by_time(self, t: time) -> "VelociyModifier.TimeSlot":
+    def find_time_slot(self, t: time) -> "VelocityModifier.TimeSlot":
+        """
+        Finds the time slot that contains the given time t.
+        """
         current_slot = self.root
 
         while current_slot:
@@ -57,13 +60,13 @@ class VelociyModifier:
         Returns the velocity modifier for the given time t.
         The slot includes the start time and excludes the end time.
         """
-        return self.__find_node_by_time(t).modifier
+        return self.find_time_slot(t).modifier
 
     def get_max_time_in_slot(self, t: time) -> timedelta:
         """
         Returns the maximum time in the slot that contains time t.
         """
-        slot = self.__find_node_by_time(t)
+        slot = self.find_time_slot(t)
         diff = datetime.combine(datetime.today(), slot.end) - datetime.combine(datetime.today(), t)
         if slot.end == time():
             diff += timedelta(days=1)

@@ -1,5 +1,8 @@
 import networkx as nx
-from dijkstra import dijkstra_shortest_path
+from dijkstra import dijkstra_shortest_path, calc_edge_travel_time
+from datetime import datetime, time, timedelta
+from velocity_modifier import VelocityModifier
+import pytest
 
 
 def test_small_graph():
@@ -32,3 +35,37 @@ def test_bigger_graph():
 
     assert dist == 9
     assert path == [1, 2, 3, 4]
+
+
+@pytest.fixture
+def simple_velocity_modifier():
+    vm_data = [
+        (datetime.strptime("00:00", "%H:%M").time(), 1),
+        (datetime.strptime("06:00", "%H:%M").time(), 0.5),
+        (datetime.strptime("18:00", "%H:%M").time(), 1.5)
+    ]
+    return VelocityModifier(vm_data)
+
+
+@pytest.fixture
+def simple_edge_data():
+    return {
+        "base_v_kmph": 50,
+        "length": 200
+    }
+
+
+@pytest.mark.parametrize(
+    "start_time, expected_duration",
+    [
+        (time(0, 0), timedelta(hours=4)),
+        (time(0, 25), timedelta(hours=4)),
+        (time(4, 0), timedelta(hours=6)),
+        (time(5, 32), timedelta(hours=7, minutes=32))
+    ]
+)
+def test_calc_edge_travel_time(start_time: time, expected_duration: timedelta, simple_velocity_modifier, simple_edge_data):
+    vm = simple_velocity_modifier
+    edge_data = simple_edge_data
+
+    assert calc_edge_travel_time(edge_data, vm, start_time) == expected_duration
