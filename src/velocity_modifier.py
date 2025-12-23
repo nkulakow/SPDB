@@ -1,5 +1,6 @@
-from datetime import time, datetime, timedelta
+from datetime import time, timedelta
 from dataclasses import dataclass
+from util.time_util import time_diff
 
 
 class VelocityModifier:
@@ -67,7 +68,5 @@ class VelocityModifier:
         Returns the maximum time in the slot that contains time t.
         """
         slot = self.find_time_slot(t)
-        diff = datetime.combine(datetime.today(), slot.end) - datetime.combine(datetime.today(), t)
-        if slot.end == time():
-            diff += timedelta(days=1)
+        diff = time_diff(t, slot.end)
         return diff

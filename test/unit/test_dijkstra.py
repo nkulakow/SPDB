@@ -67,5 +67,6 @@ def simple_edge_data():
 def test_calc_edge_travel_time(start_time: time, expected_duration: timedelta, simple_velocity_modifier, simple_edge_data):
     vm = simple_velocity_modifier
     edge_data = simple_edge_data
+    duration, _ = calc_edge_travel_time(edge_data, vm, start_time)
 
-    assert calc_edge_travel_time(edge_data, vm, start_time) == expected_duration
+    assert duration == expected_duration
