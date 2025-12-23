@@ -1,4 +1,4 @@
-from datetime import time, timedelta
+from datetime import time, timedelta, datetime
 from dataclasses import dataclass
 from util.time_util import time_diff
 
@@ -40,10 +40,11 @@ class VelocityModifier:
 
         return current_slot
 
-    def find_time_slot(self, t: time) -> "VelocityModifier.TimeSlot":
+    def find_time_slot(self, t: datetime | time) -> "VelocityModifier.TimeSlot":
         """
         Finds the time slot that contains the given time t.
         """
+        t = t.time() if isinstance(t, datetime) else t
         current_slot = self.root
 
         while current_slot:
@@ -56,17 +57,19 @@ class VelocityModifier:
 
         assert False, "unreachable code reached"
 
-    def get_velocity_modifier(self, t: time) -> float:
+    def get_velocity_modifier(self, t: datetime | time) -> float:
         """
         Returns the velocity modifier for the given time t.
         The slot includes the start time and excludes the end time.
         """
+        t = t.time() if isinstance(t, datetime) else t
         return self.find_time_slot(t).modifier
 
-    def get_max_time_in_slot(self, t: time) -> timedelta:
+    def get_max_time_in_slot(self, t: datetime | time) -> timedelta:
         """
         Returns the maximum time in the slot that contains time t.
         """
+        t = t.time() if isinstance(t, datetime) else t
         slot = self.find_time_slot(t)
         diff = time_diff(t, slot.end)
         return diff

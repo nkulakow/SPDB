@@ -1,24 +1,29 @@
 import networkx as nx
-from dijkstra import dijkstra_shortest_path, calc_edge_travel_time
+from dijkstra import dijkstra_shortest_path, calc_edge_travel_time, dijkstra_shortest_path_variable_time
 from datetime import datetime, time, timedelta
 from velocity_modifier import VelocityModifier
 import pytest
 
 
-def test_small_graph():
+@pytest.fixture
+def small_graph():
     g = nx.MultiGraph()
     g.add_edge(1, 2, key=0, weight=3)
     g.add_edge(1, 2, key=1, weight=4)
     g.add_edge(2, 3, weight=2)
     g.add_edge(1, 3, weight=10)
-    dist, path = dijkstra_shortest_path(g, 1, 3)
+    return g
+
+
+def test_small_graph(small_graph):
+    dist, path = dijkstra_shortest_path(small_graph, 1, 3)
     assert dist == 5
     assert path == [1, 2, 3]
 
 
-def test_bigger_graph():
+@pytest.fixture
+def bigger_graph():
     g = nx.MultiGraph()
-
     g.add_edge(1, 2, key=0, weight=7)
     g.add_edge(1, 2, key=1, weight=3)
 
@@ -30,8 +35,11 @@ def test_bigger_graph():
 
     g.add_edge(1, 5, weight=1)
     g.add_edge(5, 4, weight=20)
+    return g
 
-    dist, path = dijkstra_shortest_path(g, 1, 4)
+
+def test_bigger_graph(bigger_graph):
+    dist, path = dijkstra_shortest_path(bigger_graph, 1, 4)
 
     assert dist == 9
     assert path == [1, 2, 3, 4]
@@ -64,9 +72,27 @@ def simple_edge_data():
         (time(5, 32), timedelta(hours=7, minutes=32))
     ]
 )
-def test_calc_edge_travel_time(start_time: time, expected_duration: timedelta, simple_velocity_modifier, simple_edge_data):
+def test_calc_edge_travel_time(start_time: datetime, expected_duration: timedelta, simple_velocity_modifier, simple_edge_data):
     vm = simple_velocity_modifier
     edge_data = simple_edge_data
-    duration, _ = calc_edge_travel_time(edge_data, vm, start_time)
+    start_dt = datetime.combine(datetime.today(), start_time)
+    time_after_edge = calc_edge_travel_time(edge_data, vm, start_dt)
 
-    assert duration == expected_duration
+    assert time_after_edge == start_dt + expected_duration
+
+
+@pytest.fixture
+def simple_graph_with_edge_data():
+    g = nx.MultiGraph()
+    g.add_edge(1, 2, key=0, weight=0, base_v_kmph=50, length=200)
+    g.add_edge(2, 3, key=0, weight=0, base_v_kmph=50, length=100)
+    return g
+
+
+def test_dijkstra_shortest_path_variable_time(simple_velocity_modifier, simple_graph_with_edge_data):
+    start_time = datetime.combine(datetime.today(), time(5, 0))
+    expected_arrival_time = start_time + timedelta(hours=11)
+    arrival_time, path = dijkstra_shortest_path_variable_time(simple_graph_with_edge_data, 1, 3, simple_velocity_modifier, start_time)
+
+    assert arrival_time == expected_arrival_time
+    assert path == [1, 2, 3]
