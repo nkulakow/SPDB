@@ -58,8 +58,8 @@ def simple_velocity_modifier():
 @pytest.fixture
 def simple_edge_data():
     return {
-        "base_v_kmph": 50,
-        "length": 200
+        "maxspeed": 50,
+        "length": 200_000
     }
 
 
@@ -84,8 +84,8 @@ def test_calc_edge_travel_time(start_time: datetime, expected_duration: timedelt
 @pytest.fixture
 def simple_graph_with_edge_data():
     g = nx.MultiGraph()
-    g.add_edge(1, 2, key=0, base_v_kmph=50, length=200)
-    g.add_edge(2, 3, key=0, base_v_kmph=50, length=100)
+    g.add_edge(1, 2, key=0, maxspeed=50, length=200_000)
+    g.add_edge(2, 3, key=0, maxspeed=50, length=100_000)
     return g
 
 
@@ -101,13 +101,13 @@ def test_dijkstra_shortest_path_variable_time_simple_graph(simple_velocity_modif
 @pytest.fixture
 def complex_graph_with_edge_data():
     g = nx.MultiGraph()
-    g.add_edge(1, 2, key=0, base_v_kmph=50, length=200)
-    g.add_edge(2, 3, key=0, base_v_kmph=50, length=100)
-    g.add_edge(1, 3, key=0, base_v_kmph=100, length=350)
-    g.add_edge(3, 4, key=0, base_v_kmph=60, length=50)
-    g.add_edge(2, 4, key=0, base_v_kmph=100, length=120)
-    g.add_edge(1, 5, key=0, base_v_kmph=70, length=500)
-    g.add_edge(3, 5, key=0, base_v_kmph=100, length=260)
+    g.add_edge(1, 2, key=0, maxspeed=50, length=200_000)
+    g.add_edge(2, 3, key=0, maxspeed=50, length=100_000)
+    g.add_edge(1, 3, key=0, maxspeed=100, length=350_000)
+    g.add_edge(3, 4, key=0, maxspeed=60, length=50_000)
+    g.add_edge(2, 4, key=0, maxspeed=100, length=120_000)
+    g.add_edge(1, 5, key=0, maxspeed=70, length=500_000)
+    g.add_edge(3, 5, key=0, maxspeed=100, length=260_000)
     g.add_node(6)
     return g
 
