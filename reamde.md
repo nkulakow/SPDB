@@ -7,7 +7,29 @@
 
 ## Konfiguracja
 
-Python 3.11.0
+### Server
+
+Python 3.11.0 + zależności z pliku `requiremets.txt`
+
+1. Sklonować repozytorium do wybranego folderu i przejść do folderu `server`.
+2. Utworzyć nowe środowisko wirtualne komendą:
+
+```
+python -m venv venv
+```
+
+3. Aktywować środowisko.
+4. Zainstalować wymagane zależności komendą:
+
+```
+pip install -r ./requirements.txt
+```
+
+5. Zweryfikować poprawność konfiguracji uruchamiając testy:
+
+```
+pytest
+```
 
 ## Przydatne linki
 
