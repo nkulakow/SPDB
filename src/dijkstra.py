@@ -30,7 +30,12 @@ def dijkstra_shortest_path(g: MultiGraph, start: int, end: int) -> tuple[int, li
     return current_distance, current_path
 
 
-def calc_edge_travel_time(edge_data: dict, velocity_modifier: VelocityModifier, start_time: datetime) -> tuple[timedelta, datetime]:
+def calc_edge_travel_time(edge_data: dict, velocity_modifier: VelocityModifier, start_time: datetime) -> datetime:
+    """
+    Calculates travel time for edge with provided edge_data, using modifications provided by velocirt_modifier.
+
+    :return: time after crossing the edge
+    """
     v_base = edge_data.get("base_v_kmph")
     edge_length = edge_data.get("length")
     total_distance = 0
@@ -61,10 +66,15 @@ def dijkstra_shortest_path_variable_time(
         velocity_modifier: VelocityModifier,
         start_time: datetime
     ) -> tuple[datetime, list[int]]:
+    """
+    Dijkstra shortest path algorithm modified to calculate graph edge travel times dinamically based on information
+    provided by velocity_modifier. Algorithm assumes that start and and are valid, existing nodes for graph g.
+    """
     priority_queue = [(start_time, [start])] # (distsance, path) path is from begin node to current node inclusively
     visited = set()
     current_time: int
     current_path: list[int] = []
+    current_node: int
 
     while priority_queue:
         current_time, current_path = heapq.heappop(priority_queue)
@@ -81,4 +91,6 @@ def dijkstra_shortest_path_variable_time(
                 time_after_edge = calc_edge_travel_time(edge_data, velocity_modifier, current_time)
                 heapq.heappush(priority_queue, (time_after_edge, current_path + [neighbor]))
 
-    return current_time, current_path
+    if current_node == end:
+        return current_time, current_path
+    return start_time, []
