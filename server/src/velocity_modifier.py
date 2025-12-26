@@ -1,6 +1,6 @@
 from datetime import time, timedelta, datetime
 from dataclasses import dataclass
-from util.time_util import time_diff
+from src.util.time_util import time_diff
 
 
 class VelocityModifier:

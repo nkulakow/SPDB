@@ -1,4 +1,4 @@
-from velocity_modifier import VelocityModifier
+from src.velocity_modifier import VelocityModifier
 from datetime import time, datetime, timedelta
 import pytest
 

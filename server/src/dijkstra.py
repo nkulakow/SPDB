@@ -1,6 +1,6 @@
 import heapq
 from networkx import MultiGraph
-from velocity_modifier import VelocityModifier
+from src.velocity_modifier import VelocityModifier
 from datetime import datetime, timedelta
 
 

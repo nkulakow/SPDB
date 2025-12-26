@@ -1,5 +1,5 @@
 from datetime import time, timedelta
-from util.time_util import time_diff, add_time
+from src.util.time_util import time_diff, add_time
 import pytest
 
 
