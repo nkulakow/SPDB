@@ -1,0 +1,47 @@
+html, body, #root {
+  margin: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.layout {
+  display: flex;
+  height: 100%;
+}
+
+.map {
+  flex: 1;
+  height: 100%;
+}
+
+.route-form {
+  padding: 16px;          
+  width: 400px;
+  background-color: #2a2a2a;
+  display: flex;
+  flex-direction: column;
+  gap: 2;     
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.white-textfield .MuiInputBase-input {
+  color: white;
+}
+
+.white-textfield .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline {
+  border-color: white;
+}
+
+.white-textfield .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: white;
+}
+
+.white-textfield .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: white;
+  border-style:dashed;
+}
+
+.white-textfield .MuiInputBase-input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
