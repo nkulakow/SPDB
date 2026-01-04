@@ -1,7 +1,8 @@
-import time
+from datetime import datetime, time
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from src.dijkstra import dijkstra_shortest_path_variable_time
+from src.routing_service import find_shortest_paths
+from src.extensions import GLOBAL_GRAPH
 
 app = Flask(__name__)
 CORS(app, origins=["http://localhost:3000"])
@@ -14,10 +15,19 @@ def index():
 
 @app.route("/planner/plan", methods=["POST"])
 def plan_route():
-    data = request.get_json()  # parses JSON into a Python dict
-    print(data)
-    # return jsonify({"error": "Bad node: aa"}), 400 # Example error response
-    time.sleep(0.1)  # Simulate processing delay
+    data = request.get_json()
+    start_location = data.get("startLocation")
+    end_locations = data.get("endLocations")
+    start_time = data.get("timeStart")
+    end_time = data.get("timeEnd")
+    result = find_shortest_paths(
+        start_location,
+        end_locations,
+        datetime.combine(datetime.today(), time(hour=start_time)),
+        datetime.combine(datetime.today(), time(hour=end_time)),
+    )
+    # print("\n\n\n", result, "\n\n\n")
+    print(GLOBAL_GRAPH)
     return jsonify(
         {
             "start": {"name": "Point A", "latitude": 52.25, "longitude": 21.02},
