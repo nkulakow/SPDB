@@ -35,11 +35,13 @@ def plan_route():
                 {
                     "destination": {"name": "Point B", "latitude": 52.31, "longitude": 21.07},
                     "plannedStartTime": "11:15",
+                    "plannedEndTime": "11:30",
                     "nodes": [{"latitude": 52.26, "longitude": 21.03}, {"latitude": 52.28, "longitude": 21.04}],
                 },
                 {
                     "destination": {"name": "Point C", "latitude": 52.22, "longitude": 20.99},
                     "plannedStartTime": "11:45",
+                    "plannedEndTime": "12:55",
                     "nodes": [{"latitude": 52.22, "longitude": 21.02}],
                 },
             ],
