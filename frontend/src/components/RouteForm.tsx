@@ -2,10 +2,6 @@ import { useState } from 'react'
 import {
   TextField,
   Button,
-  MenuItem,
-  Select,
-  FormControl,
-  InputLabel,
   Box,
   Typography,
   Stack,
@@ -19,38 +15,67 @@ import { toast } from "react-toastify";
 import { useRoute } from "../context/RouteContext";
 import { APIError } from '../api/fetchAPI';
 import type { PlannedRoute } from '../types';
-import Grid from "@mui/material/Grid";
 import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import dayjs, { Dayjs } from 'dayjs';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
 
-
-
-
-class TimeSlotOption {
-  time: number;
-  timeStr: string;
-  constructor(time: number, timeStr: string) {
-    this.time = time;
-    this.timeStr = timeStr;
-  }
-}
 
 function randomColor() {
   const hue = Math.floor(Math.random() * 360);
   return `hsl(${hue}, 90%, 38%)`;
 }
 
+export const theme = createTheme({
+  palette: { mode: "dark" },
+});
+
+const darkDateTimePickerSlots = (hasError?: boolean) => ({
+  textField: {
+    fullWidth: true,
+    error: hasError,
+  },
+
+  popper: {
+    sx: {
+      '& .MuiPickersDay-root.Mui-selected': {
+        backgroundColor: '#00c853 !important',
+        color: '#fff',
+      },
+
+      '& .MuiClockNumber-root, & .MuiMenuItem-root': {
+        color: '#fff',
+      },
+
+      '& .MuiMenuItem-root.Mui-selected': {
+        backgroundColor: '#00c853 !important',
+        color: '#fff',
+      },
+
+      '& .MuiButton-root': {
+        color: '#fff',
+      },
+      '& .MuiYearCalendar-button.Mui-selected': {
+        backgroundColor: '#00c853 !important',
+        color: '#fff',
+      },
+    },
+  },
+});
+
 
 export default function RouteForm() {
   const [start, setStart] = useState('')
   const [destinations, setDestinations] = useState<string[]>([''])
-  const [timeSlotStart, setTimeSlotStart] = useState(9)
-  const [timeSlotEnd, setTimeSlotEnd] = useState(11)
+  const [startDateTime, setStartDateTime] = useState<Dayjs | null>(dayjs());
+  const [endDateTime, setEndDateTime] = useState<Dayjs | null>(
+    dayjs().add(2, 'hour')
+  );
+
   const { setRoute } = useRoute();
   const [errors, setErrors] = useState<{ start?: string; destinations?: string[]; timeSlot?: string }>({});
-
-  const timeOptions = Array.from({ length: 25 }, (_, i) =>
-    new TimeSlotOption(i, `${i.toString().padStart(2, '0')}:00`)
-  )
 
   const addDestination = () => {
     setDestinations([...destinations, ''])
@@ -78,10 +103,11 @@ export default function RouteForm() {
     if (destErrors.some(e => e)) valid = false;
     newErrors.destinations = destErrors;
 
-    if (timeSlotStart >= timeSlotEnd) {
-      newErrors.timeSlot = "Start time must be less than End time";
+    if (!startDateTime || !endDateTime || startDateTime.isAfter(endDateTime)) {
+      newErrors.timeSlot = "Start date/time must be before End date/time";
       valid = false;
     }
+
 
     setErrors(newErrors);
     return valid;
@@ -91,7 +117,7 @@ export default function RouteForm() {
     if (!validate()) return;
 
     try {
-      const result = await planRoute(start, destinations, timeSlotStart, timeSlotEnd);
+      const result = await planRoute(start, destinations, startDateTime!, endDateTime!);
       const colored: PlannedRoute = {
         ...result,
         routes: result.routes.map(r => ({
@@ -109,16 +135,6 @@ export default function RouteForm() {
       toast.error("Failed to plan routes");
     }
   };
-
-
-  const selectMenuProps = {
-    PaperProps: {
-      style: {
-        maxHeight: 48 * 6,
-        backgroundColor: '#7a7a7aff',
-      },
-    },
-  }
 
   return (
     <Box className="route-form">
@@ -170,43 +186,40 @@ export default function RouteForm() {
       </Stack>
 
       <Typography variant="h6" gutterBottom>Time Slot</Typography>
-      <Grid container spacing={2} mb={3}>
-        <Grid size={{ xs: 6 }}>
-          <FormControl fullWidth>
-            <InputLabel>Start</InputLabel>
-            <Select
-              value={timeSlotStart}
+
+      <ThemeProvider theme={theme}>
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <Stack spacing={2} mb={3}>
+
+            <DateTimePicker
               label="Start"
-              onChange={(e) => setTimeSlotStart(e.target.value)}
-              MenuProps={selectMenuProps}
-            >
-              {timeOptions.map(time => (
-                <MenuItem key={time.time} value={time.time}>{time.timeStr}</MenuItem>
-              ))}
-            </Select>
+              value={startDateTime}
+              onChange={(newValue) => setStartDateTime(newValue)}
+              slotProps={darkDateTimePickerSlots(
+                !!errors.timeSlot,
+              )}
+            />
 
-          </FormControl>
-        </Grid>
-
-        <Grid size={{ xs: 6 }}>
-          <FormControl fullWidth>
-            <InputLabel>End</InputLabel>
-            <Select
-              value={timeSlotEnd}
+            <DateTimePicker
               label="End"
-              onChange={(e) => setTimeSlotEnd(e.target.value)}
-              MenuProps={selectMenuProps}
-            >
-              {timeOptions.map(time => (
-                <MenuItem key={time.time} value={time.time}>{time.timeStr}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Grid>
-        {errors.timeSlot && (
-          <Typography variant="caption" color="error">{errors.timeSlot}</Typography>
-        )}
-      </Grid>
+              value={endDateTime}
+              onChange={(newValue) => setEndDateTime(newValue)}
+              minDateTime={startDateTime ?? undefined}
+              slotProps={darkDateTimePickerSlots(
+                !!errors.timeSlot,
+              )}
+            />
+
+
+            {errors.timeSlot && (
+              <Typography variant="caption" color="error">
+                {errors.timeSlot}
+              </Typography>
+            )}
+          </Stack>
+        </LocalizationProvider>
+      </ThemeProvider>
+
 
 
       <Button variant="outlined" onClick={search} sx={{ color: 'white', borderColor: 'white' }}>

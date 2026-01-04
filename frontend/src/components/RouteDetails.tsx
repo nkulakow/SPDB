@@ -39,7 +39,7 @@ export default function RouteDetails({ open, setOpen }: RouteDetailsProps) {
 
             <Box>
               <Typography fontWeight="bold">{r.destination.name}</Typography>
-              <Typography>Planned start time: {r.plannedStartTime}</Typography>
+              <Typography>Best time: {r.plannedStartTime} - {r.plannedEndTime}</Typography>
             </Box>
           </Box>
         ))}
