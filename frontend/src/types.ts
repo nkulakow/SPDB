@@ -11,6 +11,7 @@ export type NamedNode = Node & {
 export type Route = {
     destination: NamedNode
     plannedStartTime: string
+    plannedEndTime: string
     nodes: Node[]
     color: string
 }
