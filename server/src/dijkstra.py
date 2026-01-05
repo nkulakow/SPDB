@@ -36,7 +36,8 @@ def calc_edge_travel_time(edge_data: dict, velocity_modifier: VelocityModifier, 
 
     :return: time after crossing the edge
     """
-    v_base = edge_data.get("maxspeed")
+    v_base = edge_data.get("speed_kph")
+
     if isinstance(v_base, str):
         v_base = int(v_base)
     elif isinstance(v_base, list):

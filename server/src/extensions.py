@@ -4,14 +4,15 @@ import os
 import pickle
 import osmnx as ox
 from geopandas import GeoDataFrame
+from pprint import pprint
 
 
-CITY = "mazowieckie"
+REGION = "mazowieckie"
 
 ROOT_DIR = Path(__file__).parent.parent
 STORAGE_DIR = ROOT_DIR / "storage"
-POLYGON_CACHE_FILE = STORAGE_DIR / f"{CITY}_polygon.pkl"
-GRAPH_CACHE_FILE = STORAGE_DIR / f"{CITY}_drive.graphml"
+POLYGON_CACHE_FILE = STORAGE_DIR / f"{REGION}_polygon.pkl"
+GRAPH_CACHE_FILE = STORAGE_DIR / f"{REGION}_drive.graphml"
 
 
 def load_graph() -> MultiDiGraph:
@@ -22,7 +23,7 @@ def load_graph() -> MultiDiGraph:
         with open(POLYGON_CACHE_FILE, "rb") as f:
             polygon = pickle.load(f)
     else:
-        polygon = ox.geocode_to_gdf(f"{CITY}, Poland").iloc[0].geometry
+        polygon = ox.geocode_to_gdf(f"{REGION}, Poland").iloc[0].geometry
         with open(POLYGON_CACHE_FILE, "wb") as f:
             pickle.dump(polygon, f)
 
@@ -37,6 +38,7 @@ def load_graph() -> MultiDiGraph:
             simplify=True
         )
         ox.save_graphml(g, GRAPH_CACHE_FILE)
+    ox.add_edge_speeds(g)
     return g
 
 

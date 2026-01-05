@@ -2,7 +2,8 @@ from datetime import datetime, time
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from src.routing_service import find_shortest_paths
-from src.extensions import GLOBAL_GRAPH
+from pprint import pprint
+
 
 app = Flask(__name__)
 CORS(app, origins=["http://localhost:3000"])
@@ -23,31 +24,25 @@ def plan_route():
     result = find_shortest_paths(
         start_location,
         end_locations,
-        datetime.combine(datetime.today(), time(hour=start_time)),
-        datetime.combine(datetime.today(), time(hour=end_time)),
+        datetime.combine(datetime.today(), time(hour=0)),
+        datetime.combine(datetime.today(), time(hour=2)),
     )
-    # print("\n\n\n", result, "\n\n\n")
-    print(GLOBAL_GRAPH)
-    return jsonify(
-        {
-            "start": {"name": "Point A", "latitude": 52.25, "longitude": 21.02},
-            "routes": [
-                {
-                    "destination": {"name": "Point B", "latitude": 52.31, "longitude": 21.07},
-                    "plannedStartTime": "11:15",
-                    "plannedEndTime": "11:30",
-                    "nodes": [{"latitude": 52.26, "longitude": 21.03}, {"latitude": 52.28, "longitude": 21.04}],
-                },
-                {
-                    "destination": {"name": "Point C", "latitude": 52.22, "longitude": 20.99},
-                    "plannedStartTime": "11:45",
-                    "plannedEndTime": "12:55",
-                    "nodes": [{"latitude": 52.22, "longitude": 21.02}],
-                },
-            ],
-        }
-    )
+    response = {
+        "start": {
+            "name": start_location,
+            "latitude": result[end_locations[0]].path[0]["latitude"],
+            "longitude": result[end_locations[0]].path[0]["longitude"],
+        },
+        "routes": [
+            {
+                "destination": {"name": dest, "latitude": info.path[-1]["latitude"], "longitude": info.path[-1]["longitude"]},
+                "plannedStartTime": info.start_time.strftime("%H:%M"),
+                "plannedEndTime": info.arrival_time.strftime("%H:%M"),
+                "nodes": info.path
+            } for dest, info in result.items()],
+    }
+    return jsonify(response)
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, use_reloader=False)
