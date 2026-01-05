@@ -37,7 +37,7 @@ def plan_route():
             {
                 "destination": {"name": dest, "latitude": info.path[-1]["latitude"], "longitude": info.path[-1]["longitude"]},
                 "plannedStartTime": info.start_time.strftime("%H:%M"),
-                "plannedEndTime": info.arrival_time.strftime("%H:%M"),
+                "plannedEndTime": (info.start_time + info.travel_time).strftime("%H:%M"),
                 "nodes": info.path
             } for dest, info in result.items()],
     }

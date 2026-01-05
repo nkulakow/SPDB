@@ -30,7 +30,7 @@ def dijkstra_shortest_path(g: MultiGraph, start: int, end: int) -> tuple[int, li
     return current_distance, current_path
 
 
-def calc_edge_travel_time(edge_data: dict, velocity_modifier: VelocityModifier, start_time: datetime) -> datetime:
+def calc_edge_travel_time(edge_data: dict, velocity_modifier: VelocityModifier, start_time: datetime) -> timedelta:
     """
     Calculates travel time for edge with provided edge_data, using modifications provided by velocirt_modifier.
 
@@ -61,7 +61,7 @@ def calc_edge_travel_time(edge_data: dict, velocity_modifier: VelocityModifier, 
 
         total_distance += distance
 
-    return current_time
+    return current_time - start_time
 
 
 def dijkstra_shortest_path_variable_time(
@@ -69,20 +69,24 @@ def dijkstra_shortest_path_variable_time(
         start: int,
         end: int,
         velocity_modifier: VelocityModifier,
-        start_time: datetime
-    ) -> tuple[datetime, list[int]]:
+        start_time: datetime,
+        best_time: timedelta | None
+    ) -> tuple[timedelta, list[int]]:
     """
     Dijkstra shortest path algorithm modified to calculate graph edge travel times dinamically based on information
     provided by velocity_modifier. Algorithm assumes that start and and are valid, existing nodes for graph g.
     """
-    priority_queue = [(start_time, [start])] # (distsance, path) path is from begin node to current node inclusively
+    priority_queue = [(timedelta(), [start])] # (total travel time, path) path is from begin node to current node inclusively
     visited = set()
-    current_time: int
+    current_travel_time = timedelta()
     current_path: list[int] = []
     current_node: int
 
     while priority_queue:
-        current_time, current_path = heapq.heappop(priority_queue)
+        current_travel_time, current_path = heapq.heappop(priority_queue)
+
+        if best_time is not None and current_travel_time >= best_time:
+            continue
 
         current_node = current_path[-1]
 
@@ -93,9 +97,9 @@ def dijkstra_shortest_path_variable_time(
 
         for _, neighbor, _, edge_data in g.edges(current_node, data=True, keys=True):
             if neighbor not in visited:
-                time_after_edge = calc_edge_travel_time(edge_data, velocity_modifier, current_time)
-                heapq.heappush(priority_queue, (time_after_edge, current_path + [neighbor]))
+                edge_travel_time = calc_edge_travel_time(edge_data, velocity_modifier, start_time + current_travel_time)
+                heapq.heappush(priority_queue, (current_travel_time + edge_travel_time, current_path + [neighbor]))
 
     if current_node == end:
-        return current_time, current_path
-    return start_time, []
+        return current_travel_time, current_path
+    return timedelta(), []

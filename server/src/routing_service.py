@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from dataclasses import dataclass
 from networkx import MultiDiGraph
 import osmnx as ox
@@ -12,13 +12,17 @@ from src.velocity_modifier import VelocityModifier
 class ShortestPathInfo:
     destination: str
     start_time: datetime
-    arrival_time: datetime
+    travel_time: timedelta
     path: list[int]
 
 
 def find_nearest_node(g: MultiDiGraph, location: str) -> int:
     lat, lon = ox.geocode(location)
     return ox.nearest_nodes(g, lon, lat)
+
+
+def get_start_times(start_time: datetime, end_time: datetime) -> list[datetime]:
+    return [start_time + i * timedelta(minutes=15) for i in range(int((end_time - start_time).total_seconds() // 900) + 1)]
 
 
 def find_shortest_paths(
@@ -34,10 +38,20 @@ def find_shortest_paths(
     ])
     start_node = find_nearest_node(GLOBAL_GRAPH, start_location)
     end_nodes = [find_nearest_node(GLOBAL_GRAPH, loc) for loc in end_locations]
+    start_times = get_start_times(start_time, end_time)
     results = {}
     for end_node, end_location in zip(end_nodes, end_locations):
-        arrival_time, path = dijkstra_shortest_path_variable_time(GLOBAL_GRAPH, start_node, end_node, vm, start_time)
-        path_data = [{"latitude": GLOBAL_GRAPH.nodes[node]["y"], "longitude": GLOBAL_GRAPH.nodes[node]["x"]} for node in path]
-        results[end_location] = ShortestPathInfo(end_location, start_time, arrival_time, path_data)
+        best_time = None
+        best_path = None
+        best_start_time = None
+        for st in start_times:
+            travel_time, path = dijkstra_shortest_path_variable_time(GLOBAL_GRAPH, start_node, end_node, vm, st, best_time)
+            if len(path) > 0 and (best_time is None or travel_time < best_time):
+                best_time = travel_time
+                best_path = path
+                best_start_time = st
+
+        path_data = [{"latitude": GLOBAL_GRAPH.nodes[node]["y"], "longitude": GLOBAL_GRAPH.nodes[node]["x"]} for node in best_path]
+        results[end_location] = ShortestPathInfo(end_location, best_start_time, best_time, path_data)
     return results
 
