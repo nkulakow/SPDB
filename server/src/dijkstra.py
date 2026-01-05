@@ -37,6 +37,9 @@ def calc_edge_travel_time(edge_data: dict, velocity_modifier: VelocityModifier, 
     :return: time after crossing the edge
     """
     v_base = edge_data.get("speed_kph")
+    road_type = edge_data.get("highway")
+    if isinstance(road_type, list):
+        road_type = road_type[0]
 
     if isinstance(v_base, str):
         v_base = int(v_base)
@@ -47,9 +50,9 @@ def calc_edge_travel_time(edge_data: dict, velocity_modifier: VelocityModifier, 
     current_time = start_time
 
     while total_distance < edge_length:
-        time_slot = velocity_modifier.find_time_slot(current_time)
+        time_slot = velocity_modifier.find_time_slot(road_type, current_time)
         v = v_base * time_slot.modifier
-        max_time_in_slot = velocity_modifier.get_max_time_in_slot(current_time)
+        max_time_in_slot = velocity_modifier.get_max_time_in_slot(road_type, current_time)
         distance = v * max_time_in_slot.total_seconds() / 3600
 
         if total_distance + distance <= edge_length:

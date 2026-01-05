@@ -3,9 +3,9 @@ from dataclasses import dataclass
 from networkx import MultiDiGraph
 import osmnx as ox
 
-from src.extensions import GLOBAL_GRAPH
+from src.graph_service import GLOBAL_GRAPH
 from src.dijkstra import dijkstra_shortest_path_variable_time
-from src.velocity_modifier import VelocityModifier
+from src.velocity_modifier_service import VELOCITY_MODIFIER
 
 
 @dataclass(slots=True)
@@ -41,11 +41,6 @@ def find_shortest_paths(
     start_time: datetime,
     end_time: datetime
 ) -> dict[str, ShortestPathInfo]:
-    vm = VelocityModifier([
-        (datetime.strptime("00:00", "%H:%M").time(), 1.0),
-        (datetime.strptime("06:00", "%H:%M").time(), 1.2),
-        (datetime.strptime("18:00", "%H:%M").time(), 0.8),
-    ])
     start_node = find_nearest_node(GLOBAL_GRAPH, start_location)
     end_nodes = [find_nearest_node(GLOBAL_GRAPH, loc) for loc in end_locations]
     start_times = get_start_times(start_time, end_time)
@@ -59,7 +54,7 @@ def find_shortest_paths(
                 g=GLOBAL_GRAPH,
                 start=start_node,
                 end=end_node,
-                velocity_modifier=vm,
+                velocity_modifier=VELOCITY_MODIFIER,
                 start_time=st,
                 best_time=best_time
             )

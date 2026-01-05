@@ -1,18 +1,15 @@
-from pathlib import Path
 from networkx import MultiDiGraph
 import os
 import pickle
 import osmnx as ox
 from geopandas import GeoDataFrame
-from pprint import pprint
+
+from src.config import GEODATA_DIR
 
 
 REGION = "mazowieckie"
-
-ROOT_DIR = Path(__file__).parent.parent
-STORAGE_DIR = ROOT_DIR / "storage"
-POLYGON_CACHE_FILE = STORAGE_DIR / f"{REGION}_polygon.pkl"
-GRAPH_CACHE_FILE = STORAGE_DIR / f"{REGION}_drive.graphml"
+POLYGON_CACHE_FILE = GEODATA_DIR / f"{REGION}_polygon.pkl"
+GRAPH_CACHE_FILE = GEODATA_DIR / f"{REGION}_drive.graphml"
 
 
 def load_graph() -> MultiDiGraph:

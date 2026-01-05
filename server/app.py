@@ -1,8 +1,8 @@
-from datetime import datetime, time
+from datetime import datetime
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from src.routing_service import find_shortest_paths
-from pprint import pprint
+from src.velocity_modifier_service import load_traffic_data
 
 
 app = Flask(__name__)
