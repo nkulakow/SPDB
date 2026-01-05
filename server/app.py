@@ -24,8 +24,8 @@ def plan_route():
     result = find_shortest_paths(
         start_location,
         end_locations,
-        datetime.combine(datetime.today(), time(hour=0)),
-        datetime.combine(datetime.today(), time(hour=2)),
+        datetime.fromisoformat(start_time),
+        datetime.fromisoformat(end_time),
     )
     response = {
         "start": {
