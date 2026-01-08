@@ -105,6 +105,5 @@ def dijkstra_shortest_path_variable_time(
                 heapq.heappush(priority_queue, (current_travel_time + edge_travel_time, current_path + [neighbor]))
 
     if current_node == end:
-        print(current_travel_time, current_path)
         return current_travel_time, current_path
     return timedelta(), []
