@@ -2,7 +2,7 @@ from datetime import datetime
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from src.routing_service import find_shortest_paths
-from src.velocity_modifier_service import load_traffic_data
+from src.exceptions import LocationNotFoundError
 
 
 app = Flask(__name__)
@@ -21,26 +21,29 @@ def plan_route():
     end_locations = data.get("endLocations")
     start_time = data.get("timeStart")
     end_time = data.get("timeEnd")
-    result = find_shortest_paths(
-        start_location,
-        end_locations,
-        datetime.fromisoformat(start_time),
-        datetime.fromisoformat(end_time),
-    )
-    response = {
-        "start": {
-            "name": start_location,
-            "latitude": result[end_locations[0]].path[0]["latitude"],
-            "longitude": result[end_locations[0]].path[0]["longitude"],
-        },
-        "routes": [
-            {
-                "destination": {"name": dest, "latitude": info.path[-1]["latitude"], "longitude": info.path[-1]["longitude"]},
-                "plannedStartTime": info.start_time.strftime("%H:%M"),
-                "plannedEndTime": (info.start_time + info.travel_time).strftime("%H:%M"),
-                "nodes": info.path
-            } for dest, info in result.items()],
-    }
+    try:
+        result = find_shortest_paths(
+            start_location,
+            end_locations,
+            datetime.fromisoformat(start_time),
+            datetime.fromisoformat(end_time),
+        )
+        response = {
+            "start": {
+                "name": start_location,
+                "latitude": result[end_locations[0]].path[0]["latitude"],
+                "longitude": result[end_locations[0]].path[0]["longitude"],
+            },
+            "routes": [
+                {
+                    "destination": {"name": dest, "latitude": info.path[-1]["latitude"], "longitude": info.path[-1]["longitude"]},
+                    "plannedStartTime": info.start_time.strftime("%H:%M"),
+                    "plannedEndTime": (info.start_time + info.travel_time).strftime("%H:%M"),
+                    "nodes": info.path
+                } for dest, info in result.items()],
+        }
+    except LocationNotFoundError:
+        return jsonify({"error": f"Location '{start_location}' not found."}), 404
     return jsonify(response)
 
 

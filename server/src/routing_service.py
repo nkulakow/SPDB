@@ -6,6 +6,7 @@ import osmnx as ox
 from src.graph_service import GLOBAL_GRAPH
 from src.dijkstra import dijkstra_shortest_path_variable_time
 from src.velocity_modifier_service import VELOCITY_MODIFIER
+from src.exceptions import LocationNotFoundError
 
 
 @dataclass(slots=True)
@@ -17,9 +18,11 @@ class ShortestPathInfo:
 
 
 def find_nearest_node(g: MultiDiGraph, location: str) -> int:
-    lat, lon = ox.geocode(location)
-    return ox.nearest_nodes(g, lon, lat)
-
+    try:
+        lat, lon = ox.geocode(location)
+        return ox.nearest_nodes(g, lon, lat)
+    except ox._errors.InsufficientResponseError:
+        raise LocationNotFoundError(location)
 
 def get_start_times(start_time: datetime, end_time: datetime) -> list[datetime]:
     return [start_time + i * timedelta(minutes=15) for i in range(int((end_time - start_time).total_seconds() // 900) + 1)]
@@ -70,4 +73,3 @@ def find_shortest_paths(
             path=best_path
         )
     return results
-
