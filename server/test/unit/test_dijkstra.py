@@ -48,19 +48,22 @@ def test_bigger_graph(bigger_graph):
 
 @pytest.fixture
 def simple_velocity_modifier():
-    vm_data = [
-        (datetime.strptime("00:00", "%H:%M").time(), 1),
-        (datetime.strptime("06:00", "%H:%M").time(), 0.5),
-        (datetime.strptime("18:00", "%H:%M").time(), 1.5)
-    ]
+    vm_data = {
+        "residential": [
+            (datetime.strptime("00:00", "%H:%M").time(), 1),
+            (datetime.strptime("06:00", "%H:%M").time(), 0.5),
+            (datetime.strptime("18:00", "%H:%M").time(), 1.5)
+        ]
+    }
     return VelocityModifier(vm_data)
 
 
 @pytest.fixture
 def simple_edge_data():
     return {
-        "maxspeed": 50,
-        "length": 200_000
+        "speed_kph": 50,
+        "length": 200_000,
+        "highway": "residential"
     }
 
 
@@ -79,36 +82,36 @@ def test_calc_edge_travel_time(start_time: datetime, expected_duration: timedelt
     start_dt = datetime.combine(datetime.today(), start_time)
     time_after_edge = calc_edge_travel_time(edge_data, vm, start_dt)
 
-    assert time_after_edge == start_dt + expected_duration
+    assert time_after_edge == expected_duration
 
 
 @pytest.fixture
 def simple_graph_with_edge_data():
     g = nx.MultiGraph()
-    g.add_edge(1, 2, key=0, maxspeed=50, length=200_000)
-    g.add_edge(2, 3, key=0, maxspeed=50, length=100_000)
+    g.add_edge(1, 2, key=0, speed_kph=50, length=200_000, highway="residential")
+    g.add_edge(2, 3, key=0, speed_kph=50, length=100_000, highway="residential")
     return g
 
 
 def test_dijkstra_shortest_path_variable_time_simple_graph(simple_velocity_modifier, simple_graph_with_edge_data):
     start_time = datetime.combine(datetime.today(), time(5, 0))
-    expected_arrival_time = start_time + timedelta(hours=11)
-    arrival_time, path = dijkstra_shortest_path_variable_time(simple_graph_with_edge_data, 1, 3, simple_velocity_modifier, start_time)
+    expected_duration = timedelta(hours=11)
+    duration, path = dijkstra_shortest_path_variable_time(simple_graph_with_edge_data, 1, 3, simple_velocity_modifier, start_time, None)
 
-    assert arrival_time == expected_arrival_time
+    assert duration == expected_duration
     assert path == [1, 2, 3]
 
 
 @pytest.fixture
 def complex_graph_with_edge_data():
     g = nx.MultiGraph()
-    g.add_edge(1, 2, key=0, maxspeed=50, length=200_000)
-    g.add_edge(2, 3, key=0, maxspeed=50, length=100_000)
-    g.add_edge(1, 3, key=0, maxspeed=100, length=350_000)
-    g.add_edge(3, 4, key=0, maxspeed=60, length=50_000)
-    g.add_edge(2, 4, key=0, maxspeed=100, length=120_000)
-    g.add_edge(1, 5, key=0, maxspeed=70, length=500_000)
-    g.add_edge(3, 5, key=0, maxspeed=100, length=260_000)
+    g.add_edge(1, 2, key=0, speed_kph=50, length=200_000, highway="residential")
+    g.add_edge(2, 3, key=0, speed_kph=50, length=100_000, highway="residential")
+    g.add_edge(1, 3, key=0, speed_kph=100, length=350_000, highway="residential")
+    g.add_edge(3, 4, key=0, speed_kph=60, length=50_000, highway="residential")
+    g.add_edge(2, 4, key=0, speed_kph=100, length=120_000, highway="residential")
+    g.add_edge(1, 5, key=0, speed_kph=70, length=500_000, highway="residential")
+    g.add_edge(3, 5, key=0, speed_kph=100, length=260_000, highway="residential")
     g.add_node(6)
     return g
 
@@ -134,14 +137,14 @@ def test_dijkstra_shortest_path_variable_time_complex_graph(
     simple_velocity_modifier
 ):
     start_time = datetime.combine(datetime.today(), start_time)
-    expected_arrival_time = start_time + expected_duration
-    arrival_time, path = dijkstra_shortest_path_variable_time(
+    duration, path = dijkstra_shortest_path_variable_time(
         complex_graph_with_edge_data,
         start,
         end,
         simple_velocity_modifier,
-        start_time
+        start_time,
+        None
     )
 
-    assert arrival_time == expected_arrival_time
+    assert duration == expected_duration
     assert path == expected_path
