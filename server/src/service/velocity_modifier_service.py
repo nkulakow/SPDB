@@ -3,7 +3,7 @@ from pathlib import Path
 from datetime import datetime
 
 from src.config import TRAFFIC_DATA_DIR
-from src.velocity_modifier import VelocityModifier
+from src.route_modeling.velocity_modifier import VelocityModifier
 
 
 def load_traffic_data():

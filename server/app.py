@@ -1,7 +1,7 @@
 from datetime import datetime
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from src.routing_service import find_shortest_paths
+from src.service.routing_service import find_shortest_paths
 from src.exceptions import LocationNotFoundError
 
 

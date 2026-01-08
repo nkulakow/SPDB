@@ -2,8 +2,9 @@ import networkx as nx
 import osmnx as ox
 import pytest
 from datetime import time, datetime, timedelta
-from src.velocity_modifier import VelocityModifier
-from src.dijkstra import dijkstra_shortest_path_variable_time
+
+from src.route_modeling.velocity_modifier import VelocityModifier
+from src.route_modeling.dijkstra import dijkstra_shortest_path_variable_time
 
 
 @pytest.fixture(scope="module")

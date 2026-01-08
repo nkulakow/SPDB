@@ -1,6 +1,7 @@
-from src.velocity_modifier import VelocityModifier
 from datetime import time, datetime, timedelta
 import pytest
+
+from src.route_modeling.velocity_modifier import VelocityModifier
 
 
 @pytest.fixture

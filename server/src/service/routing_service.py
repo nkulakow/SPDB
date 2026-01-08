@@ -3,9 +3,9 @@ from dataclasses import dataclass
 from networkx import MultiDiGraph
 import osmnx as ox
 
-from src.graph_service import GLOBAL_GRAPH
-from src.dijkstra import dijkstra_shortest_path_variable_time
-from src.velocity_modifier_service import VELOCITY_MODIFIER
+from src.service.graph_service import GLOBAL_GRAPH
+from src.route_modeling.dijkstra import dijkstra_shortest_path_variable_time
+from src.service.velocity_modifier_service import VELOCITY_MODIFIER
 from src.exceptions import LocationNotFoundError
 
 

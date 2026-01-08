@@ -1,8 +1,9 @@
 import networkx as nx
-from src.dijkstra import dijkstra_shortest_path, calc_edge_travel_time, dijkstra_shortest_path_variable_time
 from datetime import datetime, time, timedelta
-from src.velocity_modifier import VelocityModifier
 import pytest
+
+from src.route_modeling.dijkstra import dijkstra_shortest_path, calc_edge_travel_time, dijkstra_shortest_path_variable_time
+from src.route_modeling.velocity_modifier import VelocityModifier
 
 
 @pytest.fixture

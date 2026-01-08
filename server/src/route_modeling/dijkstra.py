@@ -1,7 +1,8 @@
 import heapq
 from networkx import MultiGraph
-from src.velocity_modifier import VelocityModifier
 from datetime import datetime, timedelta
+
+from src.route_modeling.velocity_modifier import VelocityModifier
 
 
 def dijkstra_shortest_path(g: MultiGraph, start: int, end: int) -> tuple[int, list[int]]:
