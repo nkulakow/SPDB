@@ -45,7 +45,7 @@ def calc_edge_travel_time(edge_data: dict, velocity_modifier: VelocityModifier, 
     if isinstance(v_base, str):
         v_base = int(v_base)
     elif isinstance(v_base, list):
-        v_base = max(int(segment_v) for segment_v in edge_data.get("maxspeed"))
+        v_base = max(int(segment_v) for segment_v in edge_data.get("speed_kph"))
     edge_length = edge_data.get("length") / 1000
     total_distance = 0
     current_time = start_time
@@ -105,5 +105,6 @@ def dijkstra_shortest_path_variable_time(
                 heapq.heappush(priority_queue, (current_travel_time + edge_travel_time, current_path + [neighbor]))
 
     if current_node == end:
+        print(current_travel_time, current_path)
         return current_travel_time, current_path
     return timedelta(), []
