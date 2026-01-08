@@ -1,0 +1,75 @@
+from datetime import datetime, timedelta
+from dataclasses import dataclass
+from networkx import MultiDiGraph
+import osmnx as ox
+
+from src.service.graph_service import GLOBAL_GRAPH
+from src.route_modeling.dijkstra import dijkstra_shortest_path_variable_time
+from src.service.velocity_modifier_service import VELOCITY_MODIFIER
+from src.exceptions import LocationNotFoundError
+
+
+@dataclass(slots=True)
+class ShortestPathInfo:
+    destination: str
+    start_time: datetime
+    travel_time: timedelta
+    path: list[int]
+
+
+def find_nearest_node(g: MultiDiGraph, location: str) -> int:
+    try:
+        lat, lon = ox.geocode(location)
+        return ox.nearest_nodes(g, lon, lat)
+    except ox._errors.InsufficientResponseError:
+        raise LocationNotFoundError(location)
+
+def get_start_times(start_time: datetime, end_time: datetime) -> list[datetime]:
+    return [start_time + i * timedelta(minutes=15) for i in range(int((end_time - start_time).total_seconds() // 900) + 1)]
+
+
+def create_shortest_path_info(
+    end_location: str,
+    start_time: datetime,
+    travel_time: timedelta,
+    path: list[int]
+) -> ShortestPathInfo:
+    path_data = [{"latitude": GLOBAL_GRAPH.nodes[node]["y"], "longitude": GLOBAL_GRAPH.nodes[node]["x"]} for node in path]
+    return ShortestPathInfo(end_location, start_time, travel_time, path_data)
+
+
+def find_shortest_paths(
+    start_location: str,
+    end_locations: list[str],
+    start_time: datetime,
+    end_time: datetime
+) -> dict[str, ShortestPathInfo]:
+    start_node = find_nearest_node(GLOBAL_GRAPH, start_location)
+    end_nodes = [find_nearest_node(GLOBAL_GRAPH, loc) for loc in end_locations]
+    start_times = get_start_times(start_time, end_time)
+    results = {}
+    for end_node, end_location in zip(end_nodes, end_locations):
+        best_time = None
+        best_path = None
+        best_start_time = None
+        for st in start_times:
+            travel_time, path = dijkstra_shortest_path_variable_time(
+                g=GLOBAL_GRAPH,
+                start=start_node,
+                end=end_node,
+                velocity_modifier=VELOCITY_MODIFIER,
+                start_time=st,
+                best_time=best_time
+            )
+            if len(path) > 0 and (best_time is None or travel_time < best_time):
+                best_time = travel_time
+                best_path = path
+                best_start_time = st
+
+        results[end_location] = create_shortest_path_info(
+            end_location=end_location,
+            start_time=best_start_time,
+            travel_time=best_time,
+            path=best_path
+        )
+    return results
