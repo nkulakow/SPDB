@@ -42,8 +42,8 @@ def plan_route():
                     "nodes": info.path
                 } for dest, info in result.items()],
         }
-    except LocationNotFoundError:
-        return jsonify({"error": f"Location '{start_location}' not found."}), 404
+    except LocationNotFoundError as e:
+        return jsonify({"error": str(e)}), 404
     return jsonify(response)
 
 
