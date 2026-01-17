@@ -21,11 +21,28 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import dayjs, { Dayjs } from 'dayjs';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import CircularProgress from '@mui/material/CircularProgress';
 
+export const ROUTE_COLORS = [
+  '#f41411',
+  '#039be5',
+  '#8e24aa',
+  '#fb8c00',
+  '#6d4c41',
+  '#1e88e5',
+  '#f839db',
+  '#5e35b1',
+  '#546e7a',
+  'rgba(20, 245, 218, 0.8)',
+  '#3949ab',
+  '#ff6f00',
+  '#880e4f',
+  '#3e2723',
+  '#c49000',
+];
 
-function randomColor() {
-  const hue = Math.floor(Math.random() * 360);
-  return `hsl(${hue}, 90%, 38%)`;
+export function getRouteColor(index: number) {
+  return ROUTE_COLORS[index % ROUTE_COLORS.length];
 }
 
 export const theme = createTheme({
@@ -76,6 +93,7 @@ export default function RouteForm() {
 
   const { setRoute } = useRoute();
   const [errors, setErrors] = useState<{ start?: string; destinations?: string[]; timeSlot?: string }>({});
+  const [loading, setLoading] = useState(false);
 
   const addDestination = () => {
     setDestinations([...destinations, ''])
@@ -115,14 +133,15 @@ export default function RouteForm() {
 
   const search = async () => {
     if (!validate()) return;
+    setLoading(true);
 
     try {
       const result = await planRoute(start, destinations, startDateTime!, endDateTime!);
       const colored: PlannedRoute = {
         ...result,
-        routes: result.routes.map(r => ({
+        routes: result.routes.map((r, i) => ({
           ...r,
-          color: randomColor()
+          color: getRouteColor(i),
         }))
       };
       setRoute(colored);
@@ -130,9 +149,11 @@ export default function RouteForm() {
     } catch (e: any) {
       if (e instanceof APIError) {
         toast.error(`Failed to plan routes: ${e.message}`);
-        return;
+      } else {
+        toast.error("Failed to plan routes");
       }
-      toast.error("Failed to plan routes");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -220,11 +241,19 @@ export default function RouteForm() {
         </LocalizationProvider>
       </ThemeProvider>
 
-
-
-      <Button variant="outlined" onClick={search} sx={{ color: 'white', borderColor: 'white' }}>
-        Search
+      <Button
+        variant="outlined"
+        onClick={search}
+        disabled={loading}
+        sx={{ color: 'white', borderColor: 'white', minWidth: 120 }}
+      >
+        {loading ? (
+          <CircularProgress size={24} sx={{ color: 'white' }} />
+        ) : (
+          'Search'
+        )}
       </Button>
+
     </Box>
   )
 }
