@@ -17,7 +17,8 @@ LOCATIONS = [
     "Otwock",
     "Grodzisk Mazowiecki",
     "Warszawa Rembertów",
-    "Warszawa Ursus Niedźwiadek"
+
+
 ]
 
 TIME_SLOTS = [
@@ -36,7 +37,7 @@ def test_locations():
     print("Testing varying number of end locations")
     times: list[list[float]] = []
     end_locations_count = 1
-    while end_locations_count < len(LOCATIONS) - 1:
+    while end_locations_count < len(LOCATIONS):
         print(f"End locations count: {end_locations_count}")
         times.append([])
         i = 0
@@ -68,7 +69,7 @@ def test_time_slots():
         for start_location in LOCATIONS:
             print(f"{j + 1}/{len(LOCATIONS)}", end="\r")
             j += 1
-            end_locations = random.sample([loc for loc in LOCATIONS if loc != start_location], 1)
+            end_locations = [[loc for loc in LOCATIONS if loc != start_location][0]]
             start = time()
             find_shortest_paths(
                 start_location=start_location,
@@ -84,22 +85,22 @@ def test_time_slots():
 
 if __name__ == "__main__":
     print("Starting Dijkstra tests")
-    location_times = test_locations()
-    pprint(location_times)
+    # location_times = test_locations()
+    # pprint(location_times)
     time_slot_times = test_time_slots()
     pprint(time_slot_times)
 
-    loc_avgs = [sum(t) / len(t) for t in location_times]
+    # loc_avgs = [sum(t) / len(t) for t in location_times]
     time_avgs = [sum(t) / len(t) for t in time_slot_times]
 
-    plt.figure(figsize=(6, 6))
-    plt.plot([i + 1 for i in range(len(loc_avgs))], loc_avgs, marker='o')
-    plt.title("Average Time vs Number of End Locations")
-    plt.xlabel("Number of End Locations")
-    plt.ylabel("Average Time (s)")
-    plt.savefig("location_times.png")
+    # plt.figure(figsize=(6, 6))
+    # plt.plot([i + 1 for i in range(len(loc_avgs))], loc_avgs, marker='o')
+    # plt.title("Average Time vs Number of End Locations")
+    # plt.xlabel("Number of End Locations")
+    # plt.ylabel("Average Time (s)")
+    # plt.savefig("location_times.png")
 
-    plt.clf()
+    # plt.clf()
 
     plt.figure(figsize=(6, 6))
     plt.plot([(i + 1) * 15 for i in range(len(time_avgs))], time_avgs, marker='o')
